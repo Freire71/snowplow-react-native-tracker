@@ -45,11 +45,11 @@ public class EventUtil {
     }
 
     public static Structured getStructuredEvent(String category, String action, String label,
-            String property, Number value, ReadableArray contexts) {
+            String property, Double value, ReadableArray contexts) {
         Structured.Builder eventBuilder = Structured.builder()
                 .action(action)
                 .category(category)
-                .value(value.doubleValue())
+                .value(value)
                 .property(property)
                 .label(label);
         List<SelfDescribingJson> nativeContexts = EventUtil.getContexts(contexts);
@@ -76,7 +76,7 @@ public class EventUtil {
         }
         return eventBuilder.build();
     }
-    
+
     public static PageView getPageViewEvent(String pageUrl, String pageTitle, String referrer, ReadableArray contexts) {
         PageView.Builder eventBuilder = PageView.builder().pageUrl(pageUrl).pageTitle(pageTitle).referrer(referrer);
         List<SelfDescribingJson> nativeContexts = EventUtil.getContexts(contexts);

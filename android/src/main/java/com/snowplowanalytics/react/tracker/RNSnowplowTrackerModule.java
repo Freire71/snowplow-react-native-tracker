@@ -4,6 +4,7 @@ package com.snowplowanalytics.react.tracker;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.Promise;
 
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
@@ -34,8 +35,27 @@ public class RNSnowplowTrackerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void initialize(String endpoint, String method, String protocol,
-                           String namespace, String appId, ReadableMap options) {
+    public void initialize(ReadableMap options,
+                           Promise promise) {
+
+        // required params
+        String endpoint;
+        String namespace;
+        String appId;
+
+        try {
+          endpoint = options.getString("endpoint");
+          namespace = options.getString("namespace");
+          appId = options.getString("appId");
+        } catch (Exception e) {
+          promise.reject("ERROR", "SnowplowTracker: initialize() requires endpoint, namespace and appId arguments to be set");
+          return;
+        }
+
+        // optional params
+        String method = options.hasKey("method") ? options.getString("method") : "post";
+        String protocol = options.hasKey("protocol") ? options.getString("protocol") : "https";
+
         this.emitter = new Emitter.EmitterBuilder(endpoint, this.reactContext)
                 .method(method.equalsIgnoreCase("post") ? HttpMethod.POST : HttpMethod.GET)
                 .security(protocol.equalsIgnoreCase("https") ? RequestSecurity.HTTPS : RequestSecurity.HTTP)
@@ -73,42 +93,42 @@ public class RNSnowplowTrackerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void setSubjectData(ReadableMap options) {
-      if (options.hasKey("userId") && options.getString("userId") != null && !options.getString("userId").isEmpty()) {
-          tracker.instance().getSubject().setUserId(options.getString("userId"));
-      }
-      if (options.hasKey("viewportWidth") && options.hasKey("viewportHeight")) {
-          tracker.instance().getSubject().setViewPort(options.getInt("viewportWidth"), options.getInt("viewportHeight"));
-      }
-      if (options.hasKey("screenWidth") && options.hasKey("screenHeight")) {
-          tracker.instance().getSubject().setScreenResolution(options.getInt("screenWidth"), options.getInt("screenHeight"));
-      }
-      if (options.hasKey("colorDepth")) {
-          tracker.instance().getSubject().setColorDepth(options.getInt("colorDepth"));
-      }
-      if (options.hasKey("timezone") && options.getString("timezone") != null
-              && !options.getString("timezone").isEmpty()) {
-          tracker.instance().getSubject().setTimezone(options.getString("timezone"));
-      }
-      if (options.hasKey("language") && options.getString("language") != null
-              && !options.getString("language").isEmpty()) {
-          tracker.instance().getSubject().setLanguage(options.getString("language"));
-      }
-      if (options.hasKey("ipAddress") && options.getString("ipAddress") != null
-              && !options.getString("ipAddress").isEmpty()) {
-          tracker.instance().getSubject().setIpAddress(options.getString("ipAddress"));
-      }
-      if (options.hasKey("useragent") && options.getString("useragent") != null
-              && !options.getString("useragent").isEmpty()) {
-          tracker.instance().getSubject().setUseragent(options.getString("useragent"));
-      }
-      if (options.hasKey("networkUserId") && options.getString("networkUserId") != null
-              && !options.getString("networkUserId").isEmpty()) {
-          tracker.instance().getSubject().setNetworkUserId(options.getString("networkUserId"));
-      }
-      if (options.hasKey("domainUserId") && options.getString("domainUserId") != null
-              && !options.getString("domainUserId").isEmpty()) {
-          tracker.instance().getSubject().setDomainUserId(options.getString("domainUserId"));
-      }
+        if (options.hasKey("userId") && options.getString("userId") != null && !options.getString("userId").isEmpty()) {
+            tracker.instance().getSubject().setUserId(options.getString("userId"));
+        }
+        if (options.hasKey("viewportWidth") && options.hasKey("viewportHeight")) {
+            tracker.instance().getSubject().setViewPort(options.getInt("viewportWidth"), options.getInt("viewportHeight"));
+        }
+        if (options.hasKey("screenWidth") && options.hasKey("screenHeight")) {
+            tracker.instance().getSubject().setScreenResolution(options.getInt("screenWidth"), options.getInt("screenHeight"));
+        }
+        if (options.hasKey("colorDepth")) {
+            tracker.instance().getSubject().setColorDepth(options.getInt("colorDepth"));
+        }
+        if (options.hasKey("timezone") && options.getString("timezone") != null
+                && !options.getString("timezone").isEmpty()) {
+            tracker.instance().getSubject().setTimezone(options.getString("timezone"));
+        }
+        if (options.hasKey("language") && options.getString("language") != null
+                && !options.getString("language").isEmpty()) {
+            tracker.instance().getSubject().setLanguage(options.getString("language"));
+        }
+        if (options.hasKey("ipAddress") && options.getString("ipAddress") != null
+                && !options.getString("ipAddress").isEmpty()) {
+            tracker.instance().getSubject().setIpAddress(options.getString("ipAddress"));
+        }
+        if (options.hasKey("useragent") && options.getString("useragent") != null
+                && !options.getString("useragent").isEmpty()) {
+            tracker.instance().getSubject().setUseragent(options.getString("useragent"));
+        }
+        if (options.hasKey("networkUserId") && options.getString("networkUserId") != null
+                && !options.getString("networkUserId").isEmpty()) {
+            tracker.instance().getSubject().setNetworkUserId(options.getString("networkUserId"));
+        }
+        if (options.hasKey("domainUserId") && options.getString("domainUserId") != null
+                && !options.getString("domainUserId").isEmpty()) {
+            tracker.instance().getSubject().setDomainUserId(options.getString("domainUserId"));
+        }
     }
 
     @ReactMethod
@@ -120,8 +140,26 @@ public class RNSnowplowTrackerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void trackStructuredEvent(String category, String action, String label,
-                                     String property, Float value, ReadableArray contexts) {
+    public void trackStructuredEvent(ReadableMap details,
+                                     ReadableArray contexts,
+                                     Promise promise) {
+        // required params
+        String category;
+        String action;
+
+        try {
+         category = details.getString("category");
+         action = details.getString("action");
+        } catch (Exception e) {
+         promise.reject("ERROR", "SnowplowTracker: trackStructuredEvent() requires category and action arguments to be set");
+         return;
+        }
+
+        // optional params
+        String label = details.hasKey("label") ? details.getString("label") : null;
+        String property = details.hasKey("property") ? details.getString("property") : null;
+        Double value = details.hasKey("value") ? details.getDouble("value") : null;
+
         Structured trackerEvent = EventUtil.getStructuredEvent(category, action, label,
                 property, value, contexts);
         if (trackerEvent != null) {
@@ -130,10 +168,28 @@ public class RNSnowplowTrackerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void trackScreenViewEvent(String screenName, String screenId, String screenType,
-                                     String previousScreenName, String previousScreenType,
-                                     String previousScreenId, String transitionType,
-                                     ReadableArray contexts) {
+    public void trackScreenViewEvent(ReadableMap details,
+                                     ReadableArray contexts,
+                                     Promise promise) {
+        // required params
+        String screenName;
+
+        try {
+          screenName = details.getString("screenName");
+        } catch (Exception e) {
+         promise.reject("ERROR", "SnowplowTracker: trackScreenViewEvent() requires screenName to be set");
+         return;
+        }
+
+        // optional params
+        String screenId = details.hasKey("screenId") ? details.getString("screenId") : null;
+        String screenType = details.hasKey("screenType") ? details.getString("screenType") : null;
+        String previousScreenName = details.hasKey("previousScreenName") ? details.getString("previousScreenName") : null;
+        String previousScreenType = details.hasKey("previousScreenType") ? details.getString("previousScreenType") : null;
+        String previousScreenId = details.hasKey("previousScreenId") ? details.getString("previousScreenId") : null;
+        String transitionType = details.hasKey("transitionType") ? details.getString("transitionType") : null;
+
+
         ScreenView trackerEvent = EventUtil.getScreenViewEvent(screenName,
                 screenId, screenType, previousScreenName, previousScreenId, previousScreenType,
                 transitionType, contexts);
@@ -143,7 +199,24 @@ public class RNSnowplowTrackerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void trackPageViewEvent(String pageUrl, String pageTitle, String referrer, ReadableArray contexts) {
+    public void trackPageViewEvent(ReadableMap details,
+                                  ReadableArray contexts,
+                                  Promise promise) {
+
+        // required params
+        String pageUrl;
+
+        try {
+          pageUrl = details.getString("pageUrl");
+        } catch (Exception e) {
+         promise.reject("ERROR", "SnowplowTracker: trackPageViewEvent() requires pageUrl to be set");
+         return;
+        }
+
+        // optional params
+        String pageTitle = details.hasKey("pageTitle") ? details.getString("pageTitle") : null;
+        String referrer = details.hasKey("pageReferrer") ? details.getString("pageReferrer") : null;
+
         PageView trackerEvent = EventUtil.getPageViewEvent(pageUrl, pageTitle, referrer, contexts);
         if (trackerEvent != null) {
             tracker.track(trackerEvent);

@@ -15,27 +15,34 @@
 RCT_EXPORT_MODULE()
 
 RCT_EXPORT_METHOD(initialize
-                  :(nonnull NSString *)endpoint
-                  :(nonnull NSString *)method
-                  :(nonnull NSString *)protocol
-                  :(nonnull NSString *)namespace
-                  :(nonnull NSString *)appId
                   :(NSDictionary *)options
-                  //:(BOOL *)autoScreenView
-                  //:(BOOL *)setPlatformContext
-                  //:(BOOL *)setBase64Encoded
-                  //:(BOOL *)setApplicationContext
-                  //:(BOOL *)setLifecycleEvents
-                  //:(BOOL *)setScreenContext
-                  //:(BOOL *)setInstallEvent
-                  //:(BOOL *)setSessionContext
-                  //:(INT *)foregroundTimeout
-                  //:(INT *)backgroundTimeout
-                  //:(STRING *)userId
+                  :rejecter:(RCTPromiseRejectBlock)reject
                 ) {
+
+    // required params
+    __block NSString * endpoint;
+    __block NSString * namespace;
+    __block NSString * appId;
+
+    if (options[@"endpoint"] != nil && options[@"namespace"] != nil && options[@"appId"] != nil) {
+      endpoint = options[@"endpoint"];
+      namespace = options[@"namespace"];
+      appId = options[@"appId"];
+    } else {
+      NSError * error = [NSError errorWithDomain:@"SnowplowTracker" code:100 userInfo:nil];
+      reject(@"ERROR", @"SnowplowTracker: initialize() requires endpoint, namespace and appId arguments to be set", error);
+    }
+
+
     BOOL setPlatformContext = NO;
     BOOL setGeoLocationContext = NO;
+
     if ([options[@"setPlatformContext"] boolValue]) setPlatformContext = YES;
+
+    // optional params
+    NSString * method = options[@"method"];
+    NSString * protocol = options[@"protocol"];
+
     SPSubject *subject = [[SPSubject alloc] initWithPlatformContext:setPlatformContext andGeoContext:setGeoLocationContext];
 
     SPEmitter *emitter = [SPEmitter build:^(id<SPEmitterBuilder> builder) {
@@ -131,12 +138,27 @@ RCT_EXPORT_METHOD(trackSelfDescribingEvent
 }
 
 RCT_EXPORT_METHOD(trackStructuredEvent
-                  :(nonnull NSString *)category // required (non-empty string)
-                  :(nonnull NSString *)action // required
-                  :(NSString *)label
-                  :(NSString *)property
-                  :(double)value
-                  :(NSArray<SPSelfDescribingJson *> *)contexts) {
+                  :(NSDictionary *)details
+                  :(NSArray<SPSelfDescribingJson *> *)contexts
+                  :rejecter:(RCTPromiseRejectBlock)reject) {
+
+    // required
+    __block NSString * category;
+    __block NSString * action;
+
+    if (details[@"category"] != nil && details[@"action"] != nil) {
+      category = details[@"category"];
+      action = details[@"action"];
+    } else {
+      NSError * error = [NSError errorWithDomain:@"SnowplowTracker" code:100 userInfo:nil];
+      reject(@"ERROR", @"SnowplowTracker: trackStructuredEvent() requires category and action arguments to be set", error);
+    }
+
+    NSString * label = details[@"label"];
+    NSString * property = details[@"property"];
+    NSNumber * v = details[@"value"];
+    double value = [v doubleValue];
+
     SPStructured * trackerEvent = [SPStructured build:^(id<SPStructuredBuilder> builder) {
         [builder setCategory:category];
         [builder setAction:action];
@@ -151,14 +173,30 @@ RCT_EXPORT_METHOD(trackStructuredEvent
 }
 
 RCT_EXPORT_METHOD(trackScreenViewEvent
-                  :(nonnull NSString *)screenName
-                  :(NSString *)screenId
-                  :(NSString *)screenType
-                  :(NSString *)previousScreenName
-                  :(NSString *)previousScreenType
-                  :(NSString *)previousScreenId
-                  :(NSString *)transitionType
-                  :(NSArray<SPSelfDescribingJson *> *)contexts) {
+
+                  :(NSDictionary *)details
+                  :(NSArray<SPSelfDescribingJson *> *)contexts
+                  :rejecter:(RCTPromiseRejectBlock)reject) {
+
+    // required params
+    __block NSString * screenName;
+
+    if (details[@"screenName"] != nil) {
+      screenName = details[@"screenName"];
+    } else {
+      NSError * error = [NSError errorWithDomain:@"SnowplowTracker" code:100 userInfo:nil];
+      reject(@"ERROR", @"SnowplowTracker: trackScreenViewEvent() requires screenName to be set", error);
+      return;
+    }
+
+    // optional params
+    NSString * screenId = details[@"screenId"];
+    NSString * screenType = details[@"screenType"];
+    NSString * previousScreenName = details[@"previousScreenName"];
+    NSString * previousScreenType = details[@"previousScreenType"];
+    NSString * previousScreenId = details[@"previousScreenId"];
+    NSString * transitionType = details[@"transitionType"];
+
     SPScreenView * SVevent = [SPScreenView build:^(id<SPScreenViewBuilder> builder) {
         [builder setName:screenName];
         if (screenId != nil) [builder setScreenId:screenId];
@@ -175,10 +213,25 @@ RCT_EXPORT_METHOD(trackScreenViewEvent
 }
 
 RCT_EXPORT_METHOD(trackPageViewEvent
-                  :(nonnull NSString *)pageUrl // required (non-empty string)
-                  :(NSString *)pageTitle
-                  :(NSString *)pageReferrer
-                  :(NSArray<SPSelfDescribingJson *> *)contexts) {
+                  :(NSDictionary *)details
+                  :(NSArray<SPSelfDescribingJson *> *)contexts
+                  :rejecter:(RCTPromiseRejectBlock)reject) {
+
+    // required params
+    __block NSString * pageUrl;
+
+    if (details[@"pageUrl"] != nil) {
+      pageUrl = details[@"pageUrl"];
+    } else {
+      NSError * error = [NSError errorWithDomain:@"SnowplowTracker" code:100 userInfo:nil];
+      reject(@"ERROR", @"SnowplowTracker: trackPageViewEvent() requires pageUrl to be set", error);
+      return;
+    }
+
+    // optional params
+    NSString * pageTitle = details[@"pageTitle"];
+    NSString * pageReferrer = details[@"pageReferrer"];
+
     SPPageView * trackerEvent = [SPPageView build:^(id<SPPageViewBuilder> builder) {
         [builder setPageUrl:pageUrl];
         if (pageTitle != nil) [builder setPageTitle:pageTitle];
