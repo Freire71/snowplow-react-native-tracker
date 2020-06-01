@@ -72,6 +72,12 @@ const App: () => React$Node = () => {
     Tracker.trackPageViewEvent({pageUrl: 'acme.com', pageTitle: 'some title', pageReferrer: 'refr.com'}, []);
     Tracker.trackScreenViewEvent({screenName: 'someOtherName'}, []);
   }
+  const onPressShowMeSomeWarnings = () => {
+    Tracker.trackSelfDescribingEvent({}, []);
+    Tracker.trackStructuredEvent({}, []);
+    Tracker.trackPageViewEvent({}, []);
+    Tracker.trackScreenViewEvent({}, []);
+  }
   return (
     <>
       <StatusBar barStyle="dark-content" />
@@ -115,6 +121,12 @@ const App: () => React$Node = () => {
                   title="Send event"
                   color="#841584"
                   accessibilityLabel="Send an event"
+              />
+              <Button
+                  onPress={onPressShowMeSomeWarnings}
+                  title="Show me some warnings"
+                  color="#ADFF2F"
+                  accessibilityLabel="Show me some warnings"
               />
             </View>
             <LearnMoreLinks />
