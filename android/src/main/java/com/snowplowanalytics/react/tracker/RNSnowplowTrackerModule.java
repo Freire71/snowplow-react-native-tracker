@@ -38,27 +38,30 @@ public class RNSnowplowTrackerModule extends ReactContextBaseJavaModule {
     public void initialize(ReadableMap options,
                            Promise promise) {
 
-        // required params
-        String endpoint;
-        String namespace;
-        String appId;
+        // throw if index.js has failed to pass a complete options object
+        if (!(options.hasKey("endpoint") &&
+            options.hasKey("namespace") &&
+            options.hasKey("appId") &&
+            options.hasKey("method") &&
+            options.hasKey("protocol") &&
+            options.hasKey("setBase64Encoded") &&
+            options.hasKey("setPlatformContext") &&
+            // options.hasKey("autoScreenView") && -- autoScreenView to be removed
+            options.hasKey("setApplicationContext") &&
+            options.hasKey("setLifecycleEvents") &&
+            options.hasKey("setScreenContext") &&
+            options.hasKey("setSessionContext") &&
+            options.hasKey("foregroundTimeout") &&
+            options.hasKey("backgroundTimeout") &&
+            options.hasKey("checkInterval") &&
+            options.hasKey("setInstallEvent")
+            )) {
+              promise.reject("ERROR", "SnowplowTracker: initialize() method - missing parameter with no default found");
+            }
 
-        try {
-          endpoint = options.getString("endpoint");
-          namespace = options.getString("namespace");
-          appId = options.getString("appId");
-        } catch (Exception e) {
-          promise.reject("ERROR", "SnowplowTracker: initialize() requires endpoint, namespace and appId arguments to be set");
-          return;
-        }
-
-        // optional params
-        String method = options.hasKey("method") ? options.getString("method") : "post";
-        String protocol = options.hasKey("protocol") ? options.getString("protocol") : "https";
-
-        this.emitter = new Emitter.EmitterBuilder(endpoint, this.reactContext)
-                .method(method.equalsIgnoreCase("post") ? HttpMethod.POST : HttpMethod.GET)
-                .security(protocol.equalsIgnoreCase("https") ? RequestSecurity.HTTPS : RequestSecurity.HTTP)
+        this.emitter = new Emitter.EmitterBuilder(options.getString("endpoint"), this.reactContext)
+                .method(options.getString("method").equalsIgnoreCase("post") ? HttpMethod.POST : HttpMethod.GET)
+                .security(options.getString("protocol").equalsIgnoreCase("https") ? RequestSecurity.HTTPS : RequestSecurity.HTTP)
                 .build();
         this.emitter.waitForEventStore();
 
@@ -66,27 +69,19 @@ public class RNSnowplowTrackerModule extends ReactContextBaseJavaModule {
                 .build();
 
         this.tracker = Tracker.init(new Tracker
-                .TrackerBuilder(this.emitter, namespace, appId, this.reactContext)
-                // setSubject/UserID
+                .TrackerBuilder(this.emitter, options.getString("namespace"), options.getString("appId"), this.reactContext)
                 .subject(subject)
-                // setBase64Encoded
-                .base64(options.hasKey("setBase64Encoded") ? options.getBoolean("setBase64Encoded") : false)
-                // setPlatformContext
-                .mobileContext(options.hasKey("setPlatformContext") ? options.getBoolean("setPlatformContext") : false)
-                .screenviewEvents(options.hasKey("autoScreenView") ? options.getBoolean("autoScreenView") : false)
-                // setApplicationContext
-                .applicationContext(options.hasKey("setApplicationContext") ? options.getBoolean("setApplicationContext") : false)
-                // setSessionContext
-                .sessionContext(options.hasKey("setSessionContext") ? options.getBoolean("setSessionContext") : false)
-                .sessionCheckInterval(options.hasKey("checkInterval") ? options.getInt("checkInterval") : 15)
-                .foregroundTimeout(options.hasKey("foregroundTimeout") ? options.getInt("foregroundTimeout") : 600)
-                .backgroundTimeout(options.hasKey("backgroundTimeout") ? options.getInt("backgroundTimeout") : 300)
-                // setLifecycleEvents
-                .lifecycleEvents(options.hasKey("setLifecycleEvents") ? options.getBoolean("setLifecycleEvents") : false)
-                // setScreenContext
-                .screenContext(options.hasKey("setScreenContext") ? options.getBoolean("setScreenContext") : false)
-                // setInstallEvent
-                .installTracking(options.hasKey("setInstallEvent") ? options.getBoolean("setInstallEvent") : false)
+                .base64(options.getBoolean("setBase64Encoded"))
+                .mobileContext(options.getBoolean("setPlatformContext"))
+                // .screenviewEvents(options.getBoolean("autoScreenView")) // autoScreenView to be removed
+                .applicationContext(options.getBoolean("setApplicationContext"))
+                .sessionContext(options.getBoolean("setSessionContext"))
+                .sessionCheckInterval(options.getInt("checkInterval"))
+                .foregroundTimeout(options.getInt("foregroundTimeout"))
+                .backgroundTimeout(options.getInt("backgroundTimeout"))
+                .lifecycleEvents(options.getBoolean("setLifecycleEvents"))
+                .screenContext(options.getBoolean("setScreenContext"))
+                .installTracking(options.getBoolean("setInstallEvent"))
                 .build()
         );
     }

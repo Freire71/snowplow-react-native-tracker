@@ -4,7 +4,8 @@ const { RNSnowplowTracker } = NativeModules;
 
 function _applyDefaults(input, defaults) {
   let combined = input;
-  Object.keys(defaults).forEach((key) => { if(!(key in input)) {
+  Object.keys(defaults).forEach((key) => {
+    if(!(key in combined)) {
       combined[key] = defaults[key];
       }});
   return combined;
