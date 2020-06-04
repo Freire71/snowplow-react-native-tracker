@@ -179,25 +179,18 @@ RCT_EXPORT_METHOD(trackPageViewEvent
                   :(NSArray<SPSelfDescribingJson *> *)contexts
                   :rejecter:(RCTPromiseRejectBlock)reject) {
 
-    // required params
-    __block NSString * pageUrl;
-
-    if (details[@"pageUrl"] != nil) {
-      pageUrl = details[@"pageUrl"];
-    } else {
+    if (!(details[@"pageUrl"] != nil &&
+          details[@"pageTitle"] != nil &&
+          details[@"pageReferrer"] != nil
+    )) {
       NSError * error = [NSError errorWithDomain:@"SnowplowTracker" code:100 userInfo:nil];
-      reject(@"ERROR", @"SnowplowTracker: trackPageViewEvent() requires pageUrl to be set", error);
-      return;
+      reject(@"ERROR", @"SnowplowTracker: trackScreenViewEvent() method - missing parameter with no default found", error);
     }
 
-    // optional params
-    NSString * pageTitle = details[@"pageTitle"];
-    NSString * pageReferrer = details[@"pageReferrer"];
-
     SPPageView * trackerEvent = [SPPageView build:^(id<SPPageViewBuilder> builder) {
-        [builder setPageUrl:pageUrl];
-        if (pageTitle != nil) [builder setPageTitle:pageTitle];
-        if (pageReferrer != nil) [builder setReferrer:pageReferrer];
+        [builder setPageUrl:details[@"pageUrl"]];
+        [builder setPageTitle:details[@"pageTitle"]];
+        [builder setReferrer:details[@"pageReferrer"]];
         if (contexts) {
             [builder setContexts:[[NSMutableArray alloc] initWithArray:contexts]];
         }

@@ -92,8 +92,14 @@ export default class Tracker {
   }
 
   static trackPageViewEvent(argmap, ctxt=[]) {
+
+    let defs = {
+      pageTitle: null,
+      pageReferrer: null
+    }
+
     if (typeof argmap.pageUrl !== 'undefined') {
-      return RNSnowplowTracker.trackPageViewEvent(argmap, ctxt);
+      return RNSnowplowTracker.trackPageViewEvent(_applyDefaults(argmap, defs), ctxt);
     } else {
       console.warn("SnowplowTracker: trackPageViewEvent() requires pageUrl parameter to be set");
       return;

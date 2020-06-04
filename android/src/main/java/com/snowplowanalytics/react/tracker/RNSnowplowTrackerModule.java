@@ -194,24 +194,20 @@ public class RNSnowplowTrackerModule extends ReactContextBaseJavaModule {
                                   ReadableArray contexts,
                                   Promise promise) {
 
-        // required params
-        String pageUrl;
-
-        try {
-          pageUrl = details.getString("pageUrl");
-        } catch (Exception e) {
-         promise.reject("ERROR", "SnowplowTracker: trackPageViewEvent() requires pageUrl to be set");
-         return;
+        if (!(details.hasKey("pageUrl") &&
+          details.hasKey("pageTitle") &&
+          details.hasKey("pageReferrer")
+        )) {
+        promise.reject("ERROR", "SnowplowTracker: trackPageViewEvent() method - missing parameter with no default found");
         }
 
-        // optional params
-        String pageTitle = details.hasKey("pageTitle") ? details.getString("pageTitle") : null;
-        String referrer = details.hasKey("pageReferrer") ? details.getString("pageReferrer") : null;
-
-        PageView trackerEvent = EventUtil.getPageViewEvent(pageUrl, pageTitle, referrer, contexts);
+        PageView trackerEvent = EventUtil.getPageViewEvent(
+            details.getString("pageUrl"),
+            details.getString("pageTitle"),
+            details.getString("pageReferrer"),
+            contexts);
         if (trackerEvent != null) {
             tracker.track(trackerEvent);
-
         }
     }
 }
