@@ -163,28 +163,27 @@ public class RNSnowplowTrackerModule extends ReactContextBaseJavaModule {
     public void trackScreenViewEvent(ReadableMap details,
                                      ReadableArray contexts,
                                      Promise promise) {
-        // required params
-        String screenName;
 
-        try {
-          screenName = details.getString("screenName");
-        } catch (Exception e) {
-         promise.reject("ERROR", "SnowplowTracker: trackScreenViewEvent() requires screenName to be set");
-         return;
+        if (!(details.hasKey("screenName") &&
+          details.hasKey("screenId") &&
+          details.hasKey("screenType") &&
+          details.hasKey("previousScreenName") &&
+          details.hasKey("previousScreenType") &&
+          details.hasKey("previousScreenId") &&
+          details.hasKey("transitionType")
+        )) {
+        promise.reject("ERROR", "SnowplowTracker: trackScreenViewEvent() method - missing parameter with no default found");
         }
 
-        // optional params
-        String screenId = details.hasKey("screenId") ? details.getString("screenId") : null;
-        String screenType = details.hasKey("screenType") ? details.getString("screenType") : null;
-        String previousScreenName = details.hasKey("previousScreenName") ? details.getString("previousScreenName") : null;
-        String previousScreenType = details.hasKey("previousScreenType") ? details.getString("previousScreenType") : null;
-        String previousScreenId = details.hasKey("previousScreenId") ? details.getString("previousScreenId") : null;
-        String transitionType = details.hasKey("transitionType") ? details.getString("transitionType") : null;
-
-
-        ScreenView trackerEvent = EventUtil.getScreenViewEvent(screenName,
-                screenId, screenType, previousScreenName, previousScreenId, previousScreenType,
-                transitionType, contexts);
+        ScreenView trackerEvent = EventUtil.getScreenViewEvent(
+          details.getString("screenName"),
+          details.getString("screenId"),
+          details.getString("screenType"),
+          details.getString("previousScreenName"),
+          details.getString("previousScreenId"),
+          details.getString("previousScreenType"),
+          details.getString("transitionType"),
+          contexts);
         if (trackerEvent != null) {
             tracker.track(trackerEvent);
         }

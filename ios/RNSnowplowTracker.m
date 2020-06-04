@@ -125,7 +125,7 @@ RCT_EXPORT_METHOD(trackStructuredEvent
           details[@"property"] != nil // 'value' key deliberately removed if null/undefined, so no check on that.
         )) {
           NSError * error = [NSError errorWithDomain:@"SnowplowTracker" code:100 userInfo:nil];
-          reject(@"ERROR", @"SnowplowTracker: initialize() method - missing parameter with no default found", error);
+          reject(@"ERROR", @"SnowplowTracker: trackStructuredEvent() method - missing parameter with no default found", error);
         }
 
     SPStructured * trackerEvent = [SPStructured build:^(id<SPStructuredBuilder> builder) {
@@ -147,33 +147,26 @@ RCT_EXPORT_METHOD(trackScreenViewEvent
                   :(NSArray<SPSelfDescribingJson *> *)contexts
                   :rejecter:(RCTPromiseRejectBlock)reject) {
 
-    // required params
-    __block NSString * screenName;
-
-    if (details[@"screenName"] != nil) {
-      screenName = details[@"screenName"];
-    } else {
+    if (!(details[@"screenName"] != nil &&
+          details[@"screenId"] != nil &&
+          details[@"screenType"] != nil &&
+          details[@"previousScreenName"] != nil &&
+          details[@"previousScreenType"] != nil &&
+          details[@"previousScreenId"] != nil &&
+          details[@"transitionType"] != nil
+    )) {
       NSError * error = [NSError errorWithDomain:@"SnowplowTracker" code:100 userInfo:nil];
-      reject(@"ERROR", @"SnowplowTracker: trackScreenViewEvent() requires screenName to be set", error);
-      return;
+      reject(@"ERROR", @"SnowplowTracker: trackScreenViewEvent() method - missing parameter with no default found", error);
     }
 
-    // optional params
-    NSString * screenId = details[@"screenId"];
-    NSString * screenType = details[@"screenType"];
-    NSString * previousScreenName = details[@"previousScreenName"];
-    NSString * previousScreenType = details[@"previousScreenType"];
-    NSString * previousScreenId = details[@"previousScreenId"];
-    NSString * transitionType = details[@"transitionType"];
-
     SPScreenView * SVevent = [SPScreenView build:^(id<SPScreenViewBuilder> builder) {
-        [builder setName:screenName];
-        if (screenId != nil) [builder setScreenId:screenId];
-        if (screenType != nil) [builder setType:screenType];
-        if (previousScreenName != nil) [builder setPreviousScreenName:previousScreenName];
-        if (previousScreenType != nil) [builder setPreviousScreenType:previousScreenType];
-        if (previousScreenId != nil) [builder setPreviousScreenId:previousScreenId];
-        if (transitionType != nil) [builder setTransitionType:transitionType];
+        [builder setName:details[@"screenName"]];
+        if (details[@"screenId"] != (id)[NSNull null]) [builder setScreenId:details[@"screenId"]];
+        if (details[@"screenType"] != (id)[NSNull null]) [builder setType:details[@"screenType"]];
+        if (details[@"previousScreenName"] != (id)[NSNull null]) [builder setPreviousScreenName:details[@"previousScreenName"]];
+        if (details[@"previousScreenType"] != (id)[NSNull null]) [builder setPreviousScreenType:details[@"previousScreenType"]];
+        if (details[@"previousScreenId"] != (id)[NSNull null]) [builder setPreviousScreenId:details[@"previousScreenId"]];
+        if (details[@"transitionType"] != (id)[NSNull null]) [builder setTransitionType:details[@"transitionType"]];
         if (contexts) {
             [builder setContexts:[[NSMutableArray alloc] initWithArray:contexts]];
         }

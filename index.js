@@ -42,17 +42,19 @@ export default class Tracker {
     RNSnowplowTracker.setSubjectData(argmap);
   }
 
-    static trackScreenViewEvent(argmap, ctxt=[]) {
-                // screenName,
-                // screenId,
-                // screenType,
-                // previousScreenName,
-                // previousScreenId,
-                // transitionType,
-                // contexts: []}) {
+  static trackScreenViewEvent(argmap, ctxt=[]) {
+
+    let defs = {
+      screenId: null,
+      screenType: null,
+      previousScreenName: null,
+      previousScreenType: null,
+      previousScreenId: null,
+      transitionType: null
+    }
 
     if (typeof argmap.screenName !== 'undefined') {
-      return RNSnowplowTracker.trackScreenViewEvent(argmap, ctxt);
+      return RNSnowplowTracker.trackScreenViewEvent(_applyDefaults(argmap, defs), ctxt);
     } else {
       console.warn("SnowplowTracker: trackScreenViewEvent() requires screenName parameter to be set");
       return;
@@ -76,7 +78,7 @@ export default class Tracker {
     }
 
     // RN's Java bridge forces value into double, which throws on null or undefined.
-    // Remove 'value' key if null or undefined are found to work around this limitation
+    // Remove 'value' key if null or undefined to work around this limitation
     if (argmap['value'] == null) {
       delete(argmap['value'])
     }
