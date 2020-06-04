@@ -41,7 +41,7 @@ RCT_EXPORT_METHOD(initialize
       reject(@"ERROR", @"SnowplowTracker: initialize() method - missing parameter with no default found", error);
     }
 
-    SPSubject *subject = [[SPSubject alloc] initWithPlatformContext:options[@"setPlatformContext"] andGeoContext:NO];
+    SPSubject *subject = [[SPSubject alloc] initWithPlatformContext:[options[@"setPlatformContext"] boolValue] andGeoContext:NO];
 
     SPEmitter *emitter = [SPEmitter build:^(id<SPEmitterBuilder> builder) {
         [builder setUrlEndpoint:options[@"endpoint"]];
@@ -51,17 +51,17 @@ RCT_EXPORT_METHOD(initialize
     self.tracker = [SPTracker build:^(id<SPTrackerBuilder> builder) {
         [builder setEmitter:emitter];
         [builder setAppId:options[@"appId"]];
-        [builder setBase64Encoded:options[@"setBase64Encoded"]];
+        [builder setBase64Encoded:[options[@"setBase64Encoded"] boolValue]];
         [builder setTrackerNamespace:options[@"namespace"]];
         // [builder setAutotrackScreenViews:options[@"autoScreenView"]]; -- to be removed
-        [builder setApplicationContext:options[@"setApplicationContext"]];
-        [builder setLifecycleEvents:options[@"setLifecycleEvents"]];
-        [builder setScreenContext:options[@"setScreenContext"]];
-        [builder setInstallEvent:options[@"setInstallEvent"]];
+        [builder setApplicationContext:[options[@"setApplicationContext"] boolValue]];
+        [builder setLifecycleEvents:[options[@"setLifecycleEvents"] boolValue]];
+        [builder setScreenContext:[options[@"setScreenContext"] boolValue]];
+        [builder setInstallEvent:[options[@"setInstallEvent"] boolValue]];
         [builder setSubject:subject];
         // setSessionContextui
         if ([options[@"setSessionContext"] boolValue]) {
-          [builder setSessionContext:options[@"setSessionContext"]];
+          [builder setSessionContext:[options[@"setSessionContext"] boolValue]];
           [builder setCheckInterval:[options[@"checkInterval"] integerValue]];
           [builder setForegroundTimeout:[options[@"foregroundTimeout"] integerValue]];
           [builder setBackgroundTimeout:[options[@"backgroundTimeout"] integerValue]];
@@ -184,7 +184,7 @@ RCT_EXPORT_METHOD(trackPageViewEvent
           details[@"pageReferrer"] != nil
     )) {
       NSError * error = [NSError errorWithDomain:@"SnowplowTracker" code:100 userInfo:nil];
-      reject(@"ERROR", @"SnowplowTracker: trackScreenViewEvent() method - missing parameter with no default found", error);
+      reject(@"ERROR", @"SnowplowTracker: trackPageViewEvent() method - missing parameter with no default found", error);
     }
 
     SPPageView * trackerEvent = [SPPageView build:^(id<SPPageViewBuilder> builder) {
