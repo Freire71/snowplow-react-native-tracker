@@ -69,8 +69,20 @@ export default class Tracker {
   }
 
   static trackStructuredEvent(argmap, ctxt=[]) {
+
+    let defs = {
+      property: null,
+      label: null
+    }
+
+    // RN's Java bridge forces value into double, which throws on null or undefined.
+    // Remove 'value' key if null or undefined are found to work around this limitation
+    if (argmap['value'] == null) {
+      delete(argmap['value'])
+    }
+
     if (typeof argmap.category !== 'undefined' && typeof argmap.action !== 'undefined') {
-      return RNSnowplowTracker.trackStructuredEvent(argmap, ctxt);
+      return RNSnowplowTracker.trackStructuredEvent(_applyDefaults(argmap, defs), ctxt);
     } else {
       console.warn("SnowplowTracker: trackStructuredEvent() requires category and action parameters to be set");
       return;

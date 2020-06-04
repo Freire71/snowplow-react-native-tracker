@@ -138,25 +138,22 @@ public class RNSnowplowTrackerModule extends ReactContextBaseJavaModule {
     public void trackStructuredEvent(ReadableMap details,
                                      ReadableArray contexts,
                                      Promise promise) {
-        // required params
-        String category;
-        String action;
 
-        try {
-         category = details.getString("category");
-         action = details.getString("action");
-        } catch (Exception e) {
-         promise.reject("ERROR", "SnowplowTracker: trackStructuredEvent() requires category and action arguments to be set");
-         return;
+        if (!(details.hasKey("category") &&
+           details.hasKey("action") &&
+           details.hasKey("label") &&
+           details.hasKey("property") // 'value' key deliberately removed if null/undefined, so no check on that.
+        )) {
+         promise.reject("ERROR", "SnowplowTracker: trackStructuredEvent() method - missing parameter with no default found");
         }
 
-        // optional params
-        String label = details.hasKey("label") ? details.getString("label") : null;
-        String property = details.hasKey("property") ? details.getString("property") : null;
-        Double value = details.hasKey("value") ? details.getDouble("value") : null;
-
-        Structured trackerEvent = EventUtil.getStructuredEvent(category, action, label,
-                property, value, contexts);
+        Structured trackerEvent = EventUtil.getStructuredEvent(
+          details.getString("category"),
+          details.getString("action"),
+          details.getString("label"),
+          details.getString("property"),
+          details.hasKey("value") ? details.getDouble("value") : null,
+          contexts);
         if (trackerEvent != null) {
             tracker.track(trackerEvent);
         }

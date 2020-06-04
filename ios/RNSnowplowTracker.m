@@ -119,29 +119,21 @@ RCT_EXPORT_METHOD(trackStructuredEvent
                   :(NSArray<SPSelfDescribingJson *> *)contexts
                   :rejecter:(RCTPromiseRejectBlock)reject) {
 
-    // required
-    __block NSString * category;
-    __block NSString * action;
-
-    if (details[@"category"] != nil && details[@"action"] != nil) {
-      category = details[@"category"];
-      action = details[@"action"];
-    } else {
-      NSError * error = [NSError errorWithDomain:@"SnowplowTracker" code:100 userInfo:nil];
-      reject(@"ERROR", @"SnowplowTracker: trackStructuredEvent() requires category and action arguments to be set", error);
-    }
-
-    NSString * label = details[@"label"];
-    NSString * property = details[@"property"];
-    NSNumber * v = details[@"value"];
-    double value = [v doubleValue];
+    if (!(details[@"category"] != nil &&
+          details[@"action"] != nil &&
+          details[@"label"] != nil &&
+          details[@"property"] != nil // 'value' key deliberately removed if null/undefined, so no check on that.
+        )) {
+          NSError * error = [NSError errorWithDomain:@"SnowplowTracker" code:100 userInfo:nil];
+          reject(@"ERROR", @"SnowplowTracker: initialize() method - missing parameter with no default found", error);
+        }
 
     SPStructured * trackerEvent = [SPStructured build:^(id<SPStructuredBuilder> builder) {
-        [builder setCategory:category];
-        [builder setAction:action];
-        [builder setValue:value];
-        if (label != nil) [builder setLabel:label];
-        if (property != nil) [builder setProperty:property];
+        [builder setCategory:details[@"category"]];
+        [builder setAction:details[@"action"]];
+        [builder setValue:[details[@"value"] doubleValue]];
+        [builder setLabel:details[@"label"]];
+        [builder setProperty:details[@"property"]];
         if (contexts) {
             [builder setContexts:[[NSMutableArray alloc] initWithArray:contexts]];
         }
