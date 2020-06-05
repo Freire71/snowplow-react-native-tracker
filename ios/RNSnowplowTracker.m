@@ -59,13 +59,10 @@ RCT_EXPORT_METHOD(initialize
         [builder setScreenContext:[options[@"setScreenContext"] boolValue]];
         [builder setInstallEvent:[options[@"setInstallEvent"] boolValue]];
         [builder setSubject:subject];
-        // setSessionContextui
-        if ([options[@"setSessionContext"] boolValue]) {
-          [builder setSessionContext:[options[@"setSessionContext"] boolValue]];
-          [builder setCheckInterval:[options[@"checkInterval"] integerValue]];
-          [builder setForegroundTimeout:[options[@"foregroundTimeout"] integerValue]];
-          [builder setBackgroundTimeout:[options[@"backgroundTimeout"] integerValue]];
-        }
+        [builder setSessionContext:[options[@"setSessionContext"] boolValue]];
+        [builder setCheckInterval:[options[@"checkInterval"] integerValue]];
+        [builder setForegroundTimeout:[options[@"foregroundTimeout"] integerValue]];
+        [builder setBackgroundTimeout:[options[@"backgroundTimeout"] integerValue]];
     }];
 }
 
@@ -119,21 +116,14 @@ RCT_EXPORT_METHOD(trackStructuredEvent
                   :(NSArray<SPSelfDescribingJson *> *)contexts
                   :rejecter:(RCTPromiseRejectBlock)reject) {
 
-    if (!(details[@"category"] != nil &&
-          details[@"action"] != nil &&
-          details[@"label"] != nil &&
-          details[@"property"] != nil // 'value' key deliberately removed if null/undefined, so no check on that.
-        )) {
-          NSError * error = [NSError errorWithDomain:@"SnowplowTracker" code:100 userInfo:nil];
-          reject(@"ERROR", @"SnowplowTracker: trackStructuredEvent() method - missing parameter with no default found", error);
-        }
-
     SPStructured * trackerEvent = [SPStructured build:^(id<SPStructuredBuilder> builder) {
         [builder setCategory:details[@"category"]];
         [builder setAction:details[@"action"]];
-        [builder setValue:[details[@"value"] doubleValue]];
-        [builder setLabel:details[@"label"]];
-        [builder setProperty:details[@"property"]];
+        if (details[@"label"] != nil) [builder setLabel:details[@"label"]];
+        if (details[@"property"] != nil) [builder setProperty:details[@"property"]];
+
+        // doubleValue cannot be NSNull, and falsey value evaluates to 0 in objective-c. Only set 'value' parameter where neither are the case.
+        if (details[@"value"] != (id)[NSNull null] && details[@"value"] != nil)  [builder setValue:[details[@"value"] doubleValue]];
         if (contexts) {
             [builder setContexts:[[NSMutableArray alloc] initWithArray:contexts]];
         }
@@ -147,26 +137,16 @@ RCT_EXPORT_METHOD(trackScreenViewEvent
                   :(NSArray<SPSelfDescribingJson *> *)contexts
                   :rejecter:(RCTPromiseRejectBlock)reject) {
 
-    if (!(details[@"screenName"] != nil &&
-          details[@"screenId"] != nil &&
-          details[@"screenType"] != nil &&
-          details[@"previousScreenName"] != nil &&
-          details[@"previousScreenType"] != nil &&
-          details[@"previousScreenId"] != nil &&
-          details[@"transitionType"] != nil
-    )) {
-      NSError * error = [NSError errorWithDomain:@"SnowplowTracker" code:100 userInfo:nil];
-      reject(@"ERROR", @"SnowplowTracker: trackScreenViewEvent() method - missing parameter with no default found", error);
-    }
-
     SPScreenView * SVevent = [SPScreenView build:^(id<SPScreenViewBuilder> builder) {
         [builder setName:details[@"screenName"]];
-        if (details[@"screenId"] != (id)[NSNull null]) [builder setScreenId:details[@"screenId"]];
-        if (details[@"screenType"] != (id)[NSNull null]) [builder setType:details[@"screenType"]];
-        if (details[@"previousScreenName"] != (id)[NSNull null]) [builder setPreviousScreenName:details[@"previousScreenName"]];
-        if (details[@"previousScreenType"] != (id)[NSNull null]) [builder setPreviousScreenType:details[@"previousScreenType"]];
-        if (details[@"previousScreenId"] != (id)[NSNull null]) [builder setPreviousScreenId:details[@"previousScreenId"]];
-        if (details[@"transitionType"] != (id)[NSNull null]) [builder setTransitionType:details[@"transitionType"]];
+
+        // screenId and screenType must not be NSNull.
+        if (details[@"screenId"] != (id)[NSNull null] && details[@"screenId"] != nil) [builder setScreenId:details[@"screenId"]];
+        if (details[@"screenType"] != (id)[NSNull null] && details[@"screenType"] != nil) [builder setType:details[@"screenType"]];
+        if (details[@"previousScreenName"] != nil) [builder setPreviousScreenName:details[@"previousScreenName"]];
+        if (details[@"previousScreenType"] != nil) [builder setPreviousScreenType:details[@"previousScreenType"]];
+        if (details[@"previousScreenId"] != nil) [builder setPreviousScreenId:details[@"previousScreenId"]];
+        if (details[@"transitionType"] != nil) [builder setTransitionType:details[@"transitionType"]];
         if (contexts) {
             [builder setContexts:[[NSMutableArray alloc] initWithArray:contexts]];
         }
@@ -179,18 +159,10 @@ RCT_EXPORT_METHOD(trackPageViewEvent
                   :(NSArray<SPSelfDescribingJson *> *)contexts
                   :rejecter:(RCTPromiseRejectBlock)reject) {
 
-    if (!(details[@"pageUrl"] != nil &&
-          details[@"pageTitle"] != nil &&
-          details[@"pageReferrer"] != nil
-    )) {
-      NSError * error = [NSError errorWithDomain:@"SnowplowTracker" code:100 userInfo:nil];
-      reject(@"ERROR", @"SnowplowTracker: trackPageViewEvent() method - missing parameter with no default found", error);
-    }
-
     SPPageView * trackerEvent = [SPPageView build:^(id<SPPageViewBuilder> builder) {
         [builder setPageUrl:details[@"pageUrl"]];
-        [builder setPageTitle:details[@"pageTitle"]];
-        [builder setReferrer:details[@"pageReferrer"]];
+        if (details[@"pageTitle"] != nil) [builder setPageTitle:details[@"pageTitle"]];
+        if (details[@"pageReferrer"] != nil) [builder setReferrer:details[@"pageReferrer"]];
         if (contexts) {
             [builder setContexts:[[NSMutableArray alloc] initWithArray:contexts]];
         }

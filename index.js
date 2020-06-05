@@ -44,17 +44,10 @@ export default class Tracker {
 
   static trackScreenViewEvent(argmap, ctxt=[]) {
 
-    let defs = {
-      screenId: null,
-      screenType: null,
-      previousScreenName: null,
-      previousScreenType: null,
-      previousScreenId: null,
-      transitionType: null
-    }
+    //TODO: Remove previousScreenName, previousScreenType, previousScreenId - shouldn't be settable and don't appear to work on iOS.
 
     if (typeof argmap.screenName !== 'undefined') {
-      return RNSnowplowTracker.trackScreenViewEvent(_applyDefaults(argmap, defs), ctxt);
+      return RNSnowplowTracker.trackScreenViewEvent(argmap, ctxt);
     } else {
       console.warn("SnowplowTracker: trackScreenViewEvent() requires screenName parameter to be set");
       return;
@@ -72,19 +65,8 @@ export default class Tracker {
 
   static trackStructuredEvent(argmap, ctxt=[]) {
 
-    let defs = {
-      property: null,
-      label: null
-    }
-
-    // RN's Java bridge forces value into double, which throws on null or undefined.
-    // Remove 'value' key if null or undefined to work around this limitation
-    if (argmap['value'] == null) {
-      delete(argmap['value'])
-    }
-
     if (typeof argmap.category !== 'undefined' && typeof argmap.action !== 'undefined') {
-      return RNSnowplowTracker.trackStructuredEvent(_applyDefaults(argmap, defs), ctxt);
+      return RNSnowplowTracker.trackStructuredEvent(argmap, ctxt);
     } else {
       console.warn("SnowplowTracker: trackStructuredEvent() requires category and action parameters to be set");
       return;
@@ -93,13 +75,8 @@ export default class Tracker {
 
   static trackPageViewEvent(argmap, ctxt=[]) {
 
-    let defs = {
-      pageTitle: null,
-      pageReferrer: null
-    }
-
     if (typeof argmap.pageUrl !== 'undefined') {
-      return RNSnowplowTracker.trackPageViewEvent(_applyDefaults(argmap, defs), ctxt);
+      return RNSnowplowTracker.trackPageViewEvent(argmap, ctxt);
     } else {
       console.warn("SnowplowTracker: trackPageViewEvent() requires pageUrl parameter to be set");
       return;

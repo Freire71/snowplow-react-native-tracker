@@ -139,20 +139,8 @@ public class RNSnowplowTrackerModule extends ReactContextBaseJavaModule {
                                      ReadableArray contexts,
                                      Promise promise) {
 
-        if (!(details.hasKey("category") &&
-           details.hasKey("action") &&
-           details.hasKey("label") &&
-           details.hasKey("property") // 'value' key deliberately removed if null/undefined, so no check on that.
-        )) {
-         promise.reject("ERROR", "SnowplowTracker: trackStructuredEvent() method - missing parameter with no default found");
-        }
-
         Structured trackerEvent = EventUtil.getStructuredEvent(
-          details.getString("category"),
-          details.getString("action"),
-          details.getString("label"),
-          details.getString("property"),
-          details.hasKey("value") ? details.getDouble("value") : null,
+          details,
           contexts);
         if (trackerEvent != null) {
             tracker.track(trackerEvent);
@@ -164,25 +152,8 @@ public class RNSnowplowTrackerModule extends ReactContextBaseJavaModule {
                                      ReadableArray contexts,
                                      Promise promise) {
 
-        if (!(details.hasKey("screenName") &&
-          details.hasKey("screenId") &&
-          details.hasKey("screenType") &&
-          details.hasKey("previousScreenName") &&
-          details.hasKey("previousScreenType") &&
-          details.hasKey("previousScreenId") &&
-          details.hasKey("transitionType")
-        )) {
-        promise.reject("ERROR", "SnowplowTracker: trackScreenViewEvent() method - missing parameter with no default found");
-        }
-
         ScreenView trackerEvent = EventUtil.getScreenViewEvent(
-          details.getString("screenName"),
-          details.getString("screenId"),
-          details.getString("screenType"),
-          details.getString("previousScreenName"),
-          details.getString("previousScreenId"),
-          details.getString("previousScreenType"),
-          details.getString("transitionType"),
+          details,
           contexts);
         if (trackerEvent != null) {
             tracker.track(trackerEvent);
@@ -193,18 +164,9 @@ public class RNSnowplowTrackerModule extends ReactContextBaseJavaModule {
     public void trackPageViewEvent(ReadableMap details,
                                   ReadableArray contexts,
                                   Promise promise) {
-
-        if (!(details.hasKey("pageUrl") &&
-          details.hasKey("pageTitle") &&
-          details.hasKey("pageReferrer")
-        )) {
-        promise.reject("ERROR", "SnowplowTracker: trackPageViewEvent() method - missing parameter with no default found");
-        }
-
+                                    
         PageView trackerEvent = EventUtil.getPageViewEvent(
-            details.getString("pageUrl"),
-            details.getString("pageTitle"),
-            details.getString("pageReferrer"),
+            details,
             contexts);
         if (trackerEvent != null) {
             tracker.track(trackerEvent);
