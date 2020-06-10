@@ -198,8 +198,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   sectionContainer: {
-    marginTop: 32,
+    marginTop: 16,
     paddingHorizontal: 24,
+    marginBottom: 16,
   },
   sectionTitle: {
     fontSize: 24,
