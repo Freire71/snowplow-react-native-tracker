@@ -72,8 +72,55 @@ RCT_EXPORT_METHOD(initialize:
 }
 
 RCT_EXPORT_METHOD(setSubjectData :(NSDictionary *)options) {
+      // ios throws if it finds an NSNull here - unset the field if null passed
       if (options[@"userId"] != nil) {
-          [self.tracker.subject setUserId:options[@"userId"]];
+          if (options[@"userId"] == (id)[NSNull null]) {
+            [self.tracker.subject setUserId:nil];
+          } else {
+            [self.tracker.subject setUserId:options[@"userId"]];
+          }
+      }
+      if (options[@"timezone"] != nil) {
+          if (options[@"timezone"] == (id)[NSNull null]) {
+            [self.tracker.subject setTimezone:nil];
+          } else {
+            [self.tracker.subject setTimezone:options[@"timezone"]];
+          }
+      }
+      if (options[@"language"] != nil) {
+          if (options[@"language"] == (id)[NSNull null]) {
+            [self.tracker.subject setLanguage:nil];
+          } else {
+            [self.tracker.subject setLanguage:options[@"language"]];
+          }
+      }
+      if (options[@"ipAddress"] != nil) {
+          if (options[@"ipAddress"] == (id)[NSNull null]) {
+            [self.tracker.subject setIpAddress:nil];
+          } else {
+            [self.tracker.subject setIpAddress:options[@"ipAddress"]];
+          }
+      }
+      if (options[@"useragent"] != nil) {
+          if (options[@"useragent"] == (id)[NSNull null]) {
+            [self.tracker.subject setUseragent:nil];
+          } else {
+            [self.tracker.subject setUseragent:options[@"useragent"]];
+          }
+      }
+      if (options[@"networkUserId"] != nil) {
+          if (options[@"networkUserId"] == (id)[NSNull null]) {
+            [self.tracker.subject setNetworkUserId:nil];
+          } else {
+            [self.tracker.subject setNetworkUserId:options[@"networkUserId"]];
+          }
+      }
+      if (options[@"domainUserId"] != nil) {
+          if (options[@"domainUserId"] == (id)[NSNull null]) {
+              [self.tracker.subject setDomainUserId:nil];
+          } else {
+              [self.tracker.subject setDomainUserId:options[@"domainUserId"]];
+          }
       }
       if (options[@"screenWidth"] != nil && options[@"screenHeight"] != nil) {
           [self.tracker.subject setResolutionWithWidth:[options[@"screenWidth"] integerValue] andHeight:[options[@"screenHeight"] integerValue]];
@@ -83,24 +130,6 @@ RCT_EXPORT_METHOD(setSubjectData :(NSDictionary *)options) {
       }
       if (options[@"colorDepth"] != nil) {
           [self.tracker.subject setColorDepth:[options[@"colorDepth"] integerValue]];
-      }
-      if (options[@"timezone"] != nil) {
-          [self.tracker.subject setTimezone:options[@"timezone"]];
-      }
-      if (options[@"language"] != nil) {
-          [self.tracker.subject setLanguage:options[@"language"]];
-      }
-      if (options[@"ipAddress"] != nil) {
-          [self.tracker.subject setIpAddress:options[@"ipAddress"]];
-      }
-      if (options[@"useragent"] != nil) {
-          [self.tracker.subject setUseragent:options[@"useragent"]];
-      }
-      if (options[@"networkUserId"] != nil) {
-          [self.tracker.subject setNetworkUserId:options[@"networkUserId"]];
-      }
-      if (options[@"domainUserId"] != nil) {
-          [self.tracker.subject setDomainUserId:options[@"domainUserId"]];
       }
 }
 

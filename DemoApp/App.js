@@ -49,15 +49,13 @@ const App: () => React$Node = () => {
     setInstallEvent: true
     });
 
-    initPromise.then(() => Tracker.trackScreenViewEvent({screenName: 'firstScreenView'}));
-
     Tracker.setSubjectData({
       userId: 'test-userId',
       screenWidth: 123,
       screenHeight: 456,
       colorDepth: 20,
       timezone: 'Europe/London',
-      language: 'en',
+      language: 'fr',
       ipAddress: '123.45.67.89',
       useragent: '[some-user-agent-string]',
       networkUserId: '5d79770b-015b-4af8-8c91-b2ed6faf4b1e',
@@ -66,7 +64,7 @@ const App: () => React$Node = () => {
       viewportHeight: 456
     });
 
-  Tracker.trackScreenViewEvent({screenName: 'firstScreenView'}, []);
+  initPromise.then(() => Tracker.trackScreenViewEvent({screenName: 'firstScreenView'}));
 
   const onPresstrackStructuredEvent = () => {
     Tracker.trackStructuredEvent({category: 'SeTest', action: 'allPopulated', label: 'valueIsFloat', property: 'property', value: 50.00});
@@ -96,6 +94,22 @@ const App: () => React$Node = () => {
     Tracker.trackStructuredEvent({});
     Tracker.trackPageViewEvent({});
     Tracker.trackScreenViewEvent({});
+  }
+  const onPressTestSetSubject = () => {
+    Tracker.setSubjectData({
+      userId: null,
+      timezone: null,
+      language: null,
+      ipAddress: null,
+      useragent: null,
+      networkUserId: null,
+      domainUserId: null,
+      screenWidth: 123,
+      screenHeight: 456,
+      colorDepth: 20,
+      viewportWidth: 123,
+      viewportHeight: 456
+    });
   }
   return (
     <>
@@ -154,6 +168,15 @@ const App: () => React$Node = () => {
                   title="Show me some warnings"
                   color="#ADFF2F"
                   accessibilityLabel="testWrongInputs"
+              />
+            </View>
+            <View style={styles.sectionContainer}>
+              <Text style={styles.sectionTitle}>Test setting the Subject</Text>
+              <Button
+                  onPress={onPressTestSetSubject}
+                  title="Set the Subject again"
+                  color="#228B22"
+                  accessibilityLabel="testSetSubject"
               />
             </View>
           </View>
