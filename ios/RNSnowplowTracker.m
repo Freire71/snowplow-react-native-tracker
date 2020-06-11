@@ -17,8 +17,7 @@ RCT_EXPORT_MODULE()
 RCT_EXPORT_METHOD(initialize:
                   (NSDictionary *)options
                   resolver:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject
-                ) {
+                  rejecter:(RCTPromiseRejectBlock)reject) {
 
     // throw if index.js has failed to pass a complete options object
     if (!(options[@"endpoint"] != nil &&
@@ -35,10 +34,10 @@ RCT_EXPORT_METHOD(initialize:
           options[@"foregroundTimeout"] != nil &&
           options[@"backgroundTimeout"] != nil &&
           options[@"checkInterval"] != nil &&
-          options[@"setInstallEvent"] != nil
-        )) {
-      NSError * error = [NSError errorWithDomain:@"SnowplowTracker" code:100 userInfo:nil];
-      reject(@"ERROR", @"SnowplowTracker: initialize() method - missing parameter with no default found", error);
+          options[@"setInstallEvent"] != nil)) {
+
+        NSError * error = [NSError errorWithDomain:@"SnowplowTracker" code:100 userInfo:nil];
+        reject(@"ERROR", @"SnowplowTracker: initialize() method - missing parameter with no default found", error);
     }
 
     SPSubject *subject = [[SPSubject alloc] initWithPlatformContext:[options[@"setPlatformContext"] boolValue] andGeoContext:NO];
@@ -48,6 +47,7 @@ RCT_EXPORT_METHOD(initialize:
         [builder setHttpMethod:([@"post" caseInsensitiveCompare:options[@"method"]] == NSOrderedSame) ? SPRequestPost : SPRequestGet];
         [builder setProtocol:([@"https" caseInsensitiveCompare:options[@"protocol"]] == NSOrderedSame) ? SPHttps : SPHttp];
     }];
+
     self.tracker = [SPTracker build:^(id<SPTrackerBuilder> builder) {
         [builder setEmitter:emitter];
         [builder setAppId:options[@"appId"]];
@@ -63,85 +63,95 @@ RCT_EXPORT_METHOD(initialize:
         [builder setForegroundTimeout:[options[@"foregroundTimeout"] integerValue]];
         [builder setBackgroundTimeout:[options[@"backgroundTimeout"] integerValue]];
     }];
+
     if (self.tracker) {
-      resolve(@YES);
+        resolve(@YES);
     } else {
-      NSError * error = [NSError errorWithDomain:@"SnowplowTracker" code:200 userInfo:nil];
-      reject(@"ERROR", @"SnowplowTracker: initialize() method - tracker initialisation failed", error);
+        NSError * error = [NSError errorWithDomain:@"SnowplowTracker" code:200 userInfo:nil];
+        reject(@"ERROR", @"SnowplowTracker: initialize() method - tracker initialisation failed", error);
     }
 }
 
 RCT_EXPORT_METHOD(setSubjectData :(NSDictionary *)options) {
-      // ios throws if it finds an NSNull here - unset the field if null passed
-      if (options[@"userId"] != nil) {
-          if (options[@"userId"] == (id)[NSNull null]) {
+    // ios throws if it finds an NSNull here - unset the field if null passed
+    if (options[@"userId"] != nil) {
+        if (options[@"userId"] == (id)[NSNull null]) {
             [self.tracker.subject setUserId:nil];
-          } else {
+        } else {
             [self.tracker.subject setUserId:options[@"userId"]];
-          }
-      }
-      if (options[@"timezone"] != nil) {
-          if (options[@"timezone"] == (id)[NSNull null]) {
+        }
+    }
+
+    if (options[@"timezone"] != nil) {
+        if (options[@"timezone"] == (id)[NSNull null]) {
             [self.tracker.subject setTimezone:nil];
-          } else {
+        } else {
             [self.tracker.subject setTimezone:options[@"timezone"]];
-          }
-      }
-      if (options[@"language"] != nil) {
-          if (options[@"language"] == (id)[NSNull null]) {
-            [self.tracker.subject setLanguage:nil];
-          } else {
-            [self.tracker.subject setLanguage:options[@"language"]];
-          }
-      }
-      if (options[@"ipAddress"] != nil) {
-          if (options[@"ipAddress"] == (id)[NSNull null]) {
+        }
+    }
+
+    if (options[@"language"] != nil) {
+        if (options[@"language"] == (id)[NSNull null]) {
+              [self.tracker.subject setLanguage:nil];
+        } else {
+              [self.tracker.subject setLanguage:options[@"language"]];
+        }
+    }
+
+    if (options[@"ipAddress"] != nil) {
+        if (options[@"ipAddress"] == (id)[NSNull null]) {
             [self.tracker.subject setIpAddress:nil];
-          } else {
+        } else {
             [self.tracker.subject setIpAddress:options[@"ipAddress"]];
-          }
-      }
-      if (options[@"useragent"] != nil) {
-          if (options[@"useragent"] == (id)[NSNull null]) {
+        }
+    }
+    if (options[@"useragent"] != nil) {
+        if (options[@"useragent"] == (id)[NSNull null]) {
             [self.tracker.subject setUseragent:nil];
-          } else {
+        } else {
             [self.tracker.subject setUseragent:options[@"useragent"]];
-          }
-      }
-      if (options[@"networkUserId"] != nil) {
-          if (options[@"networkUserId"] == (id)[NSNull null]) {
+        }
+    }
+
+    if (options[@"networkUserId"] != nil) {
+        if (options[@"networkUserId"] == (id)[NSNull null]) {
             [self.tracker.subject setNetworkUserId:nil];
-          } else {
+        } else {
             [self.tracker.subject setNetworkUserId:options[@"networkUserId"]];
-          }
-      }
-      if (options[@"domainUserId"] != nil) {
-          if (options[@"domainUserId"] == (id)[NSNull null]) {
-              [self.tracker.subject setDomainUserId:nil];
-          } else {
-              [self.tracker.subject setDomainUserId:options[@"domainUserId"]];
-          }
-      }
-      if (options[@"screenWidth"] != nil && options[@"screenHeight"] != nil) {
-          [self.tracker.subject setResolutionWithWidth:[options[@"screenWidth"] integerValue] andHeight:[options[@"screenHeight"] integerValue]];
-      }
-      if (options[@"viewportWidth"] != nil && options[@"viewportHeight"] != nil) {
-          [self.tracker.subject setViewPortWithWidth:[options[@"viewportWidth"] integerValue] andHeight:[options[@"viewportHeight"] integerValue]];
-      }
-      if (options[@"colorDepth"] != nil) {
-          [self.tracker.subject setColorDepth:[options[@"colorDepth"] integerValue]];
-      }
+        }
+    }
+
+    if (options[@"domainUserId"] != nil) {
+        if (options[@"domainUserId"] == (id)[NSNull null]) {
+            [self.tracker.subject setDomainUserId:nil];
+        } else {
+            [self.tracker.subject setDomainUserId:options[@"domainUserId"]];
+        }
+    }
+
+    if (options[@"screenWidth"] != nil && options[@"screenHeight"] != nil) {
+        [self.tracker.subject setResolutionWithWidth:[options[@"screenWidth"] integerValue] andHeight:[options[@"screenHeight"] integerValue]];
+    }
+    if (options[@"viewportWidth"] != nil && options[@"viewportHeight"] != nil) {
+        [self.tracker.subject setViewPortWithWidth:[options[@"viewportWidth"] integerValue] andHeight:[options[@"viewportHeight"] integerValue]];
+    }
+
+    if (options[@"colorDepth"] != nil) {
+        [self.tracker.subject setColorDepth:[options[@"colorDepth"] integerValue]];
+    }
 }
 
 RCT_EXPORT_METHOD(trackSelfDescribingEvent
                   :(nonnull SPSelfDescribingJson *)event
                   :(NSArray<SPSelfDescribingJson *> *)contexts) {
+
     SPUnstructured * unstructEvent = [SPUnstructured build:^(id<SPUnstructuredBuilder> builder) {
         [builder setEventData:event];
         if (contexts) {
             [builder setContexts:[[NSMutableArray alloc] initWithArray:contexts]];
         }
     }];
+
     [self.tracker trackUnstructuredEvent:unstructEvent];
 }
 
@@ -152,20 +162,25 @@ RCT_EXPORT_METHOD(trackStructuredEvent
     SPStructured * trackerEvent = [SPStructured build:^(id<SPStructuredBuilder> builder) {
         [builder setCategory:details[@"category"]];
         [builder setAction:details[@"action"]];
-        if (details[@"label"] != nil) [builder setLabel:details[@"label"]];
-        if (details[@"property"] != nil) [builder setProperty:details[@"property"]];
-
+        if (details[@"label"] != nil) {
+            [builder setLabel:details[@"label"]];
+        }
+        if (details[@"property"] != nil) {
+            [builder setProperty:details[@"property"]];
+        }
         // doubleValue cannot be NSNull, and falsey value evaluates to 0 in objective-c. Only set 'value' parameter where neither are the case.
-        if (details[@"value"] != (id)[NSNull null] && details[@"value"] != nil)  [builder setValue:[details[@"value"] doubleValue]];
+        if (details[@"value"] != (id)[NSNull null] && details[@"value"] != nil) {
+            [builder setValue:[details[@"value"] doubleValue]];
+        }
         if (contexts) {
             [builder setContexts:[[NSMutableArray alloc] initWithArray:contexts]];
         }
     }];
+
     [self.tracker trackStructuredEvent:trackerEvent];
 }
 
 RCT_EXPORT_METHOD(trackScreenViewEvent
-
                   :(NSDictionary *)details
                   :(NSArray<SPSelfDescribingJson *> *)contexts) {
 
@@ -179,6 +194,7 @@ RCT_EXPORT_METHOD(trackScreenViewEvent
             [builder setContexts:[[NSMutableArray alloc] initWithArray:contexts]];
         }
       }];
+
       [self.tracker trackScreenViewEvent:SVevent];
 }
 
