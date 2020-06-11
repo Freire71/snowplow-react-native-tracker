@@ -16,6 +16,6 @@ jobs:
       uses: snyk/actions/node@master
       with:
         command: monitor
-        args: --project-name=snowplow-react-native-tracker
+        args: --project-name=@snowplow/react-native-tracker
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
