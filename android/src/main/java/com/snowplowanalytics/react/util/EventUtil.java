@@ -24,14 +24,16 @@ public class EventUtil {
     }
 
     public static SelfDescribingJson getSelfDescribingJson(ReadableMap json) {
-
-        String schema = json.getString("schema");
-        ReadableMap dataMap = json.getMap("data");
-        if (schema != null && dataMap != null) {
-            return new SelfDescribingJson(schema, dataMap.toHashMap());
-        } else {
-            // log error
+        if (json != null) {
+            String schema = json.getString("schema");
+            ReadableMap dataMap = json.getMap("data");
+            if (schema != null && dataMap != null) {
+                return new SelfDescribingJson(schema, dataMap.toHashMap());
+            } else {
+                // log error
+            }
         }
+
         return null;
     }
 
